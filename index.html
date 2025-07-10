@@ -1,0 +1,1412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR Analytics Data Dictionary</title>
+    
+    <!-- Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.js"></script>
+    
+    <style>
+        :root {
+            --primary-turquoise: #69a8c6;
+            --accent-red: #c3626e;
+            --accent-green: #cad08b;
+            --light-gray: #e7e7e7;
+            --gray-blue: #74828d;
+            --accent-orange: #cf862e;
+            --accent-yellow: #e3cc5a;
+            --dark-blue: #4e5764;
+            --medium-gray-blue: #9EB2BD;
+            --chart-red: #d47d6c;
+            --chart-light-blue: #a4cadc;
+            --chart-burnt-orange: #cf862e;
+            --chart-muted-yellow: #e4d58d;
+            --chart-dark-gray: #74828d;
+            --chart-medium-gray: #939ca2;
+            --chart-dark-turquoise: #4d8892;
+            --chart-black: #2d3636;
+            --map-dark-royal: #4e79a7;
+            --map-light-blue: #ccd8e3;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 50%, #f0f0f0 100%);
+            min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+
+        body.dark {
+            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 50%, #141414 100%);
+            color: #ffffff;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 24px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        body.dark .header {
+            background: #2d2d30;
+            border: 1px solid #484644;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo {
+            background: var(--primary-turquoise);
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 24px;
+            font-style: normal;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            text-align: center;
+            color: white;
+        }
+
+        .logo svg {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        body.dark .title {
+            color: white;
+        }
+
+        .subtitle {
+            color: #6b7280;
+            margin-top: 4px;
+            font-size: 14px;
+        }
+
+        body.dark .subtitle {
+            color: #a19f9d;
+        }
+
+        .dark-toggle {
+            background: var(--light-gray);
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s ease;
+        }
+
+        body.dark .dark-toggle {
+            background: var(--gray-blue);
+            color: var(--accent-yellow);
+        }
+
+        .dark-toggle:hover {
+            background: var(--medium-gray-blue);
+        }
+
+        /* Filters */
+        .filters {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 24px;
+            margin-bottom: 24px;
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        body.dark .filters {
+            background: #2d2d30;
+            border: 1px solid #484644;
+        }
+
+        .filter-group {
+            position: relative;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filter-group.search {
+            min-width: 300px;
+        }
+
+        .filter-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6b7280;
+            z-index: 1;
+            font-style: normal;
+            font-size: 16px;
+        }
+
+        .filter-input {
+            width: 100%;
+            padding: 12px 12px 12px 40px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            color: #1f2937;
+            transition: all 0.2s ease;
+        }
+
+        body.dark .filter-input {
+            background: #3b3a39;
+            border-color: #484644;
+            color: white;
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: var(--primary-turquoise);
+            box-shadow: 0 0 0 3px rgba(105, 168, 198, 0.1);
+        }
+
+        .filter-input::placeholder {
+            color: #9ca3af;
+        }
+
+        body.dark .filter-input::placeholder {
+            color: #6b7280;
+        }
+
+        /* Grid */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 24px;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            .filters {
+                flex-direction: column;
+                gap: 12px;
+            }
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid #f3f4f6;
+            position: relative;
+            overflow: hidden;
+        }
+
+        body.dark .card {
+            background: #2d2d30;
+            border-color: #484644;
+        }
+
+        .card:hover {
+            box-shadow: 0 8px 16px rgba(0,0,0,0.12);
+            border-color: #69a8c6;
+            transform: translateY(-2px);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #69a8c6, #a4cadc);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            gap: 12px;
+        }
+
+        .card-title-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .card-icon {
+            background: var(--primary-turquoise);
+            border: 1px solid #5a94b8;
+            padding: 7px;
+            border-radius: 8px;
+            font-size: 24px;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            flex-shrink: 0;
+            position: relative;
+            text-align: center;
+            color: white;
+        }
+
+        .card-icon svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        body.dark .card-icon {
+            background: var(--primary-turquoise);
+            border-color: #5a94b8;
+            opacity: 0.9;
+        }
+
+        .card-title {
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 18px;
+            margin-bottom: 4px;
+            line-height: 1.3;
+        }
+
+        body.dark .card-title {
+            color: white;
+        }
+
+        .card-type {
+            color: #6b7280;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        body.dark .card-type {
+            color: #a19f9d;
+        }
+
+        .badge {
+            background: linear-gradient(135deg, #cdd8e3, #a4cadc);
+            color: #4e79a7;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        body.dark .badge {
+            background: linear-gradient(135deg, #4e5764, #69a8c6);
+            color: white;
+        }
+
+        .chart-container {
+            width: 100%;
+            height: 120px;
+            background: linear-gradient(135deg, rgba(204, 216, 227, 0.3), rgba(164, 202, 220, 0.3));
+            border-radius: 8px;
+            margin-bottom: 20px;
+            padding: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        body.dark .chart-container {
+            background: linear-gradient(135deg, rgba(78, 87, 100, 0.3), rgba(77, 136, 146, 0.3));
+        }
+
+        .chart-canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .card-description {
+            color: #6b7280;
+            margin-bottom: 20px;
+            line-height: 1.5;
+            font-size: 14px;
+        }
+
+        body.dark .card-description {
+            color: #a19f9d;
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            padding-top: 16px;
+            border-top: 1px solid #f3f4f6;
+        }
+
+        body.dark .card-footer {
+            border-top-color: #484644;
+        }
+
+        .tags {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            background: #f3f4f6;
+            color: #374151;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        body.dark .tag {
+            background: #4b5563;
+            color: #e5e7eb;
+        }
+
+        .view-details {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: var(--primary-turquoise);
+            font-size: 14px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        
+        .view-details .view-icon {
+            font-size: 16px;
+        }
+        
+        .view-details .arrow-icon {
+            font-size: 16px;
+        }
+
+        body.dark .view-details {
+            color: var(--primary-turquoise);
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            max-width: 700px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        body.dark .modal-content {
+            background: #2d2d30;
+            border: 1px solid #484644;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px;
+            border-bottom: 1px solid #f3f4f6;
+            gap: 16px;
+        }
+
+        body.dark .modal-header {
+            border-bottom-color: #484644;
+        }
+
+        .modal-title-area {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex: 1;
+        }
+
+        .modal-icon {
+            background: var(--primary-turquoise);
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 24px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            font-style: normal;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 52px;
+            height: 52px;
+            color: white;
+            border: 1px solid #5a94b8;
+        }
+
+        .modal-icon svg {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+        }
+        
+        body.dark .modal-icon {
+            background: var(--primary-turquoise);
+            color: white;
+            opacity: 0.9;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 4px;
+            line-height: 1.2;
+        }
+
+        body.dark .modal-title {
+            color: white;
+        }
+
+        .modal-subtitle {
+            color: #6b7280;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        body.dark .modal-subtitle {
+            color: #a19f9d;
+        }
+
+        .close-btn {
+            background: var(--light-gray);
+            border: none;
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            font-size: 18px;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        body.dark .close-btn {
+            background: var(--gray-blue);
+            color: var(--light-gray);
+        }
+
+        .close-btn:hover {
+            background: var(--accent-red);
+            color: white;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .modal-section {
+            margin-bottom: 24px;
+        }
+
+        .modal-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        body.dark .section-title {
+            color: white;
+        }
+
+        .section-content {
+            color: #6b7280;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        body.dark .section-content {
+            color: #a19f9d;
+        }
+
+        .code-block {
+            background: linear-gradient(135deg, var(--light-gray), #f9fafb);
+            color: var(--dark-blue);
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 13px;
+            border: 1px solid #e5e7eb;
+            overflow-x: auto;
+            line-height: 1.5;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        body.dark .code-block {
+            background: linear-gradient(135deg, var(--chart-black), #1a1a1a);
+            color: var(--accent-green);
+            border-color: var(--gray-blue);
+        }
+
+        .modal-tag {
+            background: linear-gradient(135deg, #cdd8e3, #a4cadc);
+            color: #4e79a7;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+            display: inline-block;
+        }
+
+        body.dark .modal-tag {
+            background: linear-gradient(135deg, #4e5764, #69a8c6);
+            color: white;
+        }
+
+        .modal-chart-container {
+            height: 200px;
+            background: linear-gradient(135deg, rgba(204, 216, 227, 0.2), rgba(164, 202, 220, 0.2));
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        body.dark .modal-chart-container {
+            background: linear-gradient(135deg, rgba(78, 87, 100, 0.2), rgba(77, 136, 146, 0.2));
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 80px 20px;
+            color: #6b7280;
+        }
+
+        body.dark .no-results {
+            color: #a19f9d;
+        }
+
+        .no-results-icon {
+            font-size: 48px;
+            color: var(--primary-turquoise);
+            margin-bottom: 16px;
+            font-style: normal;
+        }
+
+        .no-results h3 {
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-radius: 50%;
+            border-top-color: var(--primary-turquoise);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-left">
+                <div class="logo">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-database" viewBox="0 0 16 16">
+                        <path d="M4.318 2.687C5.234 2.271 6.536 2 8 2s2.766.27 3.682.687C12.644 3.125 13 3.627 13 4c0 .374-.356.875-1.318 1.313C10.766 5.729 9.464 6 8 6s-2.766-.27-3.682-.687C3.356 4.875 3 4.374 3 4c0-.374.356-.875 1.318-1.313ZM13 5.698V7c0 .374-.356.875-1.318 1.313C10.766 8.729 9.464 9 8 9s-2.766-.27-3.682-.687C3.356 7.875 3 7.374 3 7V5.698c.271.202.58.378.904.525C4.978 6.711 6.427 7 8 7s3.022-.289 4.096-.777A4.92 4.92 0 0 0 13 5.698ZM14 4c0-1.007-.875-1.755-1.904-2.223C11.022 1.289 9.573 1 8 1s-3.022.289-4.096.777C2.875 2.245 2 2.993 2 4v9c0 1.007.875 1.755 1.904 2.223C4.978 15.71 6.427 16 8 16s3.022-.289 4.096-.777C13.125 14.755 14 14.007 14 13V4Zm-1 4.698V10c0 .374-.356.875-1.318 1.313C10.766 11.729 9.464 12 8 12s-2.766-.27-3.682-.687C3.356 10.875 3 10.374 3 10V8.698c.271.202.58.378.904.525C4.978 9.71 6.427 10 8 10s3.022-.289 4.096-.777A4.92 4.92 0 0 0 13 8.698Zm0 3V13c0 .374-.356.875-1.318 1.313C10.766 14.729 9.464 15 8 15s-2.766-.27-3.682-.687C3.356 13.875 3 13.374 3 13v-1.302c.271.202.58.378.904.525C4.978 12.71 6.427 13 8 13s3.022-.289 4.096-.777c.324-.147.633-.323.904-.525Z"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="title">HR Analytics Data Dictionary</div>
+                    <div class="subtitle">Interactive guide to HR dashboards, KPIs, and workforce analytics</div>
+                </div>
+            </div>
+            <button class="dark-toggle" onclick="toggleDarkMode()" title="Toggle dark mode">
+                <span id="darkModeIcon">🌙</span>
+            </button>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters">
+            <div class="filter-group search">
+                <span class="filter-icon">🔍</span>
+                <input type="text" class="filter-input" placeholder="Search HR metrics, employee data, calculations..." id="searchInput" oninput="filterItems()">
+            </div>
+            <div class="filter-group">
+                <span class="filter-icon">📊</span>
+                <select class="filter-input" id="dashboardSelect" onchange="filterItems()">
+                    <option value="All HRIS Analytics">All HRIS Analytics</option>
+                    <option value="HR Reports">HR Reports</option>
+                    <option value="Workforce Analytics Dashboard">Workforce Analytics Dashboard</option>
+                    <option value="Turnover Rate Dashboard">Turnover Rate Dashboard</option>
+                    <option value="Exit Interview Dashboard">Exit Interview Dashboard</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <span class="filter-icon">🔽</span>
+                <select class="filter-input" id="categorySelect" onchange="filterItems()">
+                    <option value="all">All Categories</option>
+                    <option value="Retention">Retention</option>
+                    <option value="Workforce">Workforce</option>
+                    <option value="Recruiting">Recruiting</option>
+                    <option value="DEI">DEI</option>
+                    <option value="Engagement">Engagement</option>
+                    <option value="Career Development">Career Development</option>
+                    <option value="Compensation">Compensation</option>
+                    <option value="Learning">Learning</option>
+                    <option value="Attendance">Attendance</option>
+                    <option value="Performance">Performance</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Results Grid -->
+        <div class="grid" id="resultsGrid">
+            <!-- Cards will be populated by JavaScript -->
+        </div>
+
+        <!-- No Results -->
+        <div class="no-results hidden" id="noResults">
+            <div class="no-results-icon">
+                🔍
+            </div>
+            <h3>No results found</h3>
+            <p>Try adjusting your search terms or filters</p>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="modal" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="modal-title-area">
+                    <div class="modal-icon" id="modalIcon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-bar-chart" viewBox="0 0 16 16">
+                            <path d="M4 11H2v3h2v-3zm5-4H7v7h2V7zm5-5v12h-2V2h2zm-2-1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1h-2zM6 7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7zm-5 4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1v-3z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="modal-title" id="modalTitle">Title</div>
+                        <div class="modal-subtitle" id="modalSubtitle">Subtitle</div>
+                    </div>
+                </div>
+                <button class="close-btn" onclick="closeModal()">
+                    ✕
+                </button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Modal content will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data with Bootstrap SVG icons
+        const dataItems = [
+            {
+                id: 1,
+                name: "Employee Turnover Rate",
+                category: "Retention",
+                dashboard: "Turnover Rate Dashboard",
+                type: "Line Chart",
+                icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-graph-up" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M0 0h1v15h15v1H0V0Zm14.817 3.113a.5.5 0 0 1 .07.704l-4.5 5.5a.5.5 0 0 1-.74.037L7.06 6.767l-3.656 5.027a.5.5 0 0 1-.808-.588l4-5.5a.5.5 0 0 1 .758-.06l2.609 2.61 4.15-5.073a.5.5 0 0 1 .704-.07Z"/></svg>',
+                shortDescription: "Tracks employee turnover percentage over time",
+                fullDescription: "This line chart displays monthly or quarterly turnover rates, helping identify retention trends and seasonal patterns in employee departures. Critical for workforce planning and retention strategy development.",
+                calculation: "(COUNT([Terminations]) / COUNT([Total Employees])) * 100",
+                usage: "Monitor retention health, identify high-risk periods, and measure the effectiveness of retention initiatives. Benchmark against industry standards.",
+                tags: ["turnover", "retention", "attrition", "trend", "kpi"],
+                chartData: {
+                    type: "line",
+                    data: [8.5, 12.3, 9.1, 7.8, 11.2, 6.9, 9.4, 10.8, 8.9, 7.2, 9.8, 11.5],
+                    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+                }
+            },
+            {
+                id: 2,
+                name: "Turnover Rate KPI",
+                category: "Retention",
+                dashboard: "Turnover Rate Dashboard",
+                type: "KPI Metric",
+                icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-percent" viewBox="0 0 16 16"><path d="M13.442 2.558a.625.625 0 0 1 0 .884l-10 10a.625.625 0 1 1-.884-.884l10-10a.625.625 0 0 1 .884 0zM4.5 6a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm0 1a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zm7 6a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm0 1a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/></svg>',
+                shortDescription: "Overall percentage of employees who left during a specific period (13.39%)",
+                fullDescription: "The percentage of employees who left the organization during a specific period compared to the average number of employees during that same period. Current value shows 13.39% with a 4.5% decrease from prior year.",
+                calculation: "Turnover Rate = (Number of Separations / Average Number of Employees) × 100",
+                usage: "Primary KPI for tracking organizational retention health and comparing against industry benchmarks. Monitor for seasonal trends and year-over-year improvements.",
+                tags: ["turnover", "kpi", "retention", "separations", "benchmark"],
+                chartData: {
+                    type: "doughnut",
+                    data: [13.39, 86.61],
+                    labels: ["Turnover", "Retained"]
+                }
+            },
+            {
+                id: 3,
+                name: "Voluntary vs Involuntary Turnover",
+                category: "Retention",
+                dashboard: "Turnover Rate Dashboard",
+                type: "Donut Chart",
+                icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-person-dash" viewBox="0 0 16 16"><path d="M6 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H1s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C9.516 10.68 8.289 10 6 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/><path fill-rule="evenodd" d="M11 7.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5z"/></svg>',
+                shortDescription: "Visual breakdown of voluntary (73.6%) vs. involuntary (26.4%) turnover",
+                fullDescription: "Visual breakdown of voluntary vs. involuntary turnover as a percentage of total turnover. Shows that voluntary turnover (9.85%) comprises the majority of total turnover compared to involuntary turnover.",
+                calculation: "Voluntary portion = (Voluntary Separations / Total Separations) × 100; Involuntary portion = (Involuntary Separations / Total Separations) × 100",
+                usage: "Quickly identify the composition of turnover to focus retention efforts on the larger component. Helps prioritize voluntary retention strategies.",
+                tags: ["voluntary", "involuntary", "composition", "visual", "breakdown"],
+                chartData: {
+                    type: "doughnut",
+                    data: [73.6, 26.4],
+                    labels: ["Voluntary", "Involuntary"]
+                }
+            },
+            {
+                id: 4,
+                name: "Reasons for Leaving",
+                category: "Retention",
+                dashboard: "Turnover Rate Dashboard",
+                type: "Horizontal Bar Chart",
+                icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-door-open" viewBox="0 0 16 16"><path d="M8.5 10c-.276 0-.5-.448-.5-1s.224-1 .5-1 .5.448.5 1-.224 1-.5 1z"/><path d="M10.828.122A.5.5 0 0 1 11 .5V1h.5A1.5 1.5 0 0 1 13 2.5V15h1.5a.5.5 0 0 1 0 1h-13a.5.5 0 0 1 0-1H3V1.5a.5.5 0 0 1 .43-.495l7-1a.5.5 0 0 1 .398.117zM11.5 2H11v13h1V2.5a.5.5 0 0 0-.5-.5zM4 1.934V15h6V1.077l-6 .857z"/></svg>',
+                shortDescription: "Top 5 most common reasons employees gave for leaving",
+                fullDescription: "The top 5 most common reasons employees gave for leaving the organization, ranked by frequency. Top reasons include New Job Opportunity (368), Other/Unknown (300), Employment term ends (269), Career Advancement (261), and Personal Reasons (252).",
+                calculation: "Count of separations by reason code, sorted descending",
+                usage: "Identify root causes of turnover to develop targeted retention strategies. Address the most common preventable reasons through policy or program changes.",
+                tags: ["exit-reasons", "analysis", "retention-strategy", "preventable", "insights"],
+                chartData: {
+                    type: "bar",
+                    data: [368, 300, 269, 261, 252],
+                    labels: ["New Job Opportunity", "Other/Unknown", "Employment Term Ends", "Career Advancement", "Personal Reasons"]
+                }
+            },
+            {
+                id: 5,
+                name: "Monthly Turnover Trends",
+                category: "Retention",
+                dashboard: "Turnover Rate Dashboard",
+                type: "Column Chart",
+                icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-calendar" viewBox="0 0 16 16"><path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/></svg>',
+                shortDescription: "Monthly turnover rates showing seasonal patterns (June peak: 20.02%)",
+                fullDescription: "Monthly turnover rates throughout the year, showing seasonal trends and patterns. June shows peak turnover at 20.02%, while November shows the lowest at 9.39%. This pattern may relate to academic calendars or fiscal year timing.",
+                calculation: "Monthly Turnover Rate = (Monthly Separations / Average Monthly Employees) × 100",
+                usage: "Identify seasonal turnover patterns for workforce planning. Prepare retention strategies during high-turnover months and optimize hiring during stable periods.",
+                tags: ["seasonal", "monthly", "patterns", "workforce-planning", "trends"],
+                chartData: {
+                    type: "bar",
+                    data: [10.64, 9.50, 9.96, 11.79, 12.86, 20.02, 15.51, 16.86, 12.10, 10.84, 9.39, 10.41],
+                    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+                }
+            },
+            {
+                id: 6,
+                name: "Turnover by Years of Service",
+                category: "Retention",
+                dashboard: "Turnover Rate Dashboard",
+                type: "Column Chart",
+                icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-bar-chart" viewBox="0 0 16 16"><path d="M4 11H2v3h2v-3zm5-4H7v7h2V7zm5-5v12h-2V2h2zm-2-1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1h-2zM6 7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7zm-5 4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1v-3z"/></svg>',
+                shortDescription: "Turnover rates by tenure showing 2-5 year critical period (26.99%)",
+                fullDescription: "Turnover rates segmented by employee tenure, showing at which career stages employees are most likely to leave. Peak turnover occurs in the 2-5 year range (26.99%), followed by new employees under 1 year (23.52%).",
+                calculation: "Tenure Turnover Rate = (Separations in Tenure Group / Average Employees in Tenure Group) × 100",
+                usage: "Identify critical retention periods for targeted development programs. Focus on 2-5 year employees who may be seeking career advancement opportunities.",
+                tags: ["tenure", "career-stages", "retention-periods", "development", "advancement"],
+                chartData: {
+                    type: "bar",
+                    data: [23.52, 22.20, 26.99, 14.55, 4.75, 2.89, 1.53, 1.20, 0.79],
+                    labels: ["<1yr", "1-2yr", "2-5yr", "5-10yr", "10-15yr", "15-20yr", "20-25yr", "25-30yr", "30+yr"]
+                }
+            },
+            {
+                id: 7,
+                name: "Department Headcount Distribution",
+                category: "Workforce",
+                dashboard: "Workforce Analytics Dashboard",
+                type: "Pie Chart",
+                icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-people" viewBox="0 0 16 16"><path d="M15 14s1 0 1-1-1-4-5-4-5 3-5 4 1 1 1 1h8zm-7.978-1A.261.261 0 0 1 7 12.996c.001-.264.167-1.03.76-1.72C8.312 10.629 9.282 10 11 10c1.717 0 2.687.63 3.24 1.276.593.69.758 1.457.76 1.72l-.008.002a.274.274 0 0 1-.014.002H7.022zM11 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM6.936 9.28a5.88 5.88 0 0 0-1.23-.247A7.35 7.35 0 0 0 5 9c-4 0-5 3-5 4 0 .667.333 1 1 1h4.216A2.238 2.238 0 0 1 5 13c0-1.01.377-2.042 1.09-2.904.243-.294.526-.569.846-.816zM4.92 10A5.493 5.493 0 0 0 4 13H1c0-.26.164-1.03.76-1.724.545-.636 1.492-1.256 3.16-1.275zM1.5 5.5a3 3 0 1 1 6 0 3 3 0 0 1-6 0zm3-2a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg>',
+                shortDescription: "Breakdown of employees by department",
+                fullDescription: "Pie chart showing the distribution of employees across different departments or business units. Helps visualize organizational structure and identify areas of growth or contraction.",
+                calculation: "COUNT([Employee ID]) by [Department]",
+                usage: "Understand organizational composition, plan department-specific initiatives, and identify staffing imbalances across teams.",
+                tags: ["headcount", "department", "workforce", "distribution", "organization"],
+                chartData: {
+                    type: "doughnut",
+                    data: [145, 89, 67, 43, 38, 29],
+                    labels: ["Engineering", "Sales", "Marketing", "Operations", "HR", "Finance"]
+                }
+            },
+            {
+                id: 8,
+                name: "Time to Fill Positions",
+                category: "Recruiting",
+                dashboard: "HR Reports",
+                type: "Bar Chart",
+                icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-stopwatch" viewBox="0 0 16 16"><path d="M8.5 5.6a.5.5 0 1 0-1 0v2.9h-3a.5.5 0 0 0 0 1H8a.5.5 0 0 0 .5-.5V5.6z"/><path d="M6.5 1A.5.5 0 0 1 7 .5h2a.5.5 0 0 1 0 1v.57c1.36.196 2.594.78 3.584 1.64a.715.715 0 0 1 .012-.013l.354-.354-.354-.353a.5.5 0 0 1 .707-.708l1.414 1.415a.5.5 0 1 1-.707.707l-.353-.354-.354.354a.512.512 0 0 1-.013.012A7 7 0 1 1 7 2.071V1.5a.5.5 0 0 1-.5-.5zM8 3a6 6 0 1 0 .001 12A6 6 0 0 0 8 3z"/></svg>',
+                shortDescription: "Average days to fill open positions by department",
+                fullDescription: "Bar chart comparing recruitment efficiency across departments. Shows average time from job posting to hire acceptance, color-coded against target benchmarks.",
+                calculation: "AVG(DATEDIFF('day', [Job Posted Date], [Hire Date])) by [Department]",
+                usage: "Identify recruitment bottlenecks, optimize hiring processes, and set realistic expectations for department managers.",
+                tags: ["recruiting", "time-to-fill", "hiring", "efficiency", "benchmark"],
+                chartData: {
+                    type: "bar",
+                    data: [45, 62, 38, 71, 29, 55],
+                    labels: ["Engineering", "Sales", "Marketing", "Operations", "HR", "Finance"]
+                }
+            },
+            {
+                id: 9,
+                name: "Employee Engagement Score",
+                category: "Engagement",
+                dashboard: "Workforce Analytics Dashboard",
+                type: "Gauge Chart",
+                icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-speedometer" viewBox="0 0 16 16"><path d="M8 2a.5.5 0 0 1 .5.5V4a.5.5 0 0 1-1 0V2.5A.5.5 0 0 1 8 2zM3.732 3.732a.5.5 0 0 1 .707 0l.915.914a.5.5 0 1 1-.708.708l-.914-.915a.5.5 0 0 1 0-.707zM2 8a.5.5 0 0 1 .5-.5h1.586a.5.5 0 0 1 0 1H2.5A.5.5 0 0 1 2 8zm9.854-3.854a.5.5 0 0 0-.708.708l.914.914a.5.5 0 1 0 .709-.707l-.915-.915zM11.5 8a.5.5 0 0 0 0 1h1.586a.5.5 0 0 0 0-1H11.5zm-6.354 4.147a.5.5 0 0 0-.707.707l.914.915a.5.5 0 0 0 .708-.708l-.915-.914zm6 .707a.5.5 0 0 0 .708-.707l-.915-.915a.5.5 0 0 0-.707.708l.914.914z"/><path d="M8 0a8 8 0 1 0 2.897 15.413c-.593-.182-.924-.756-.924-1.371 0-.833.699-1.483 1.535-1.483.694 0 1.272.516 1.434 1.182A8 8 0 0 0 8 0zm5.991 13.708A6.961 6.961 0 0 1 8 15a6.967 6.967 0 0 1-3.992-1.292A.641.641 0 0 0 4 13.5c0-.28.226-.5.5-.5h2a.495.495 0 0 0 .426-.247.495.495 0 0 0-.002-.506l-1.375-2.297a.497.497 0 0 0-.848 0l-1.375 2.297a.495.495 0 0 0-.002.506c.087.155.247.247.426.247h2c.274 0 .5.22.5.5a.638.638 0 0 0-.008.208z"/></svg>',
+                shortDescription: "Overall employee engagement index (76%)",
+                fullDescription: "Composite score measuring employee engagement through survey responses on job satisfaction, commitment, and motivation. Current score of 76% indicates strong engagement levels.",
+                calculation: "AVG([Engagement Survey Responses]) × 100",
+                usage: "Track organizational health, predict retention risks, and measure the impact of engagement initiatives. Compare across departments and time periods.",
+                tags: ["engagement", "satisfaction", "culture", "survey", "morale"],
+                chartData: {
+                    type: "doughnut",
+                    data: [76, 24],
+                    labels: ["Engaged", "Gap"]
+                }
+            },
+            {
+                id: 10,
+                name: "Diversity Demographics",
+                category: "DEI",
+                dashboard: "Workforce Analytics Dashboard",
+                type: "Stacked Bar Chart",
+                icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-people-fill" viewBox="0 0 16 16"><path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path fill-rule="evenodd" d="M5.216 14A2.238 2.238 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.325 6.325 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1h4.216z"/><path d="M4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/></svg>',
+                shortDescription: "Workforce diversity breakdown by gender, ethnicity, and age",
+                fullDescription: "Comprehensive view of organizational diversity metrics including gender distribution, ethnic representation, and age demographics across different levels and departments.",
+                calculation: "COUNT([Employee ID]) grouped by [Gender], [Ethnicity], [Age Range]",
+                usage: "Monitor DEI progress, identify representation gaps, and ensure equitable practices across all organizational levels. Support diversity reporting requirements.",
+                tags: ["diversity", "inclusion", "demographics", "equity", "representation"],
+                chartData: {
+                    type: "bar",
+                    data: [52, 48, 35, 28, 22, 15],
+                    labels: ["Male", "Female", "Gen Z", "Millennial", "Gen X", "Boomer"]
+                }
+            },
+            {
+                id: 11,
+                name: "Training Completion Rate",
+                category: "Learning",
+                dashboard: "HR Reports",
+                type: "Progress Bar",
+                icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-mortarboard" viewBox="0 0 16 16"><path d="M8.211 2.047a.5.5 0 0 0-.422 0l-7.5 3.5a.5.5 0 0 0 .025.917l7.5 3a.5.5 0 0 0 .372 0L14 7.14V13a1 1 0 0 0-1 1v2h3v-2a1 1 0 0 0-1-1V6.739l.686-.275a.5.5 0 0 0 .025-.917l-7.5-3.5ZM8 8.46 1.758 5.965 8 3.052l6.242 2.913L8 8.46Z"/><path d="M4.176 9.032a.5.5 0 0 0-.656.327l-.5 1.7a.5.5 0 0 0 .294.605l4.5 1.8a.5.5 0 0 0 .372 0l4.5-1.8a.5.5 0 0 0 .294-.605l-.5-1.7a.5.5 0 0 0-.656-.327L8 10.466 4.176 9.032Z"/></svg>',
+                shortDescription: "Percentage of employees completing required training (82%)",
+                fullDescription: "Tracks completion rates for mandatory training programs including compliance, safety, and role-specific certifications. Shows current completion at 82% with department breakdowns.",
+                calculation: "(COUNT([Completed Training]) / COUNT([Assigned Training])) × 100",
+                usage: "Ensure compliance with training requirements, identify departments needing support, and track L&D program effectiveness.",
+                tags: ["training", "compliance", "learning", "development", "certification"],
+                chartData: {
+                    type: "doughnut",
+                    data: [82, 18],
+                    labels: ["Completed", "Pending"]
+                }
+            },
+            {
+                id: 12,
+                name: "Performance Rating Distribution",
+                category: "Performance",
+                dashboard: "Workforce Analytics Dashboard",
+                type: "Bell Curve",
+                icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-bar-chart-line" viewBox="0 0 16 16"><path d="M11 2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v12h.5a.5.5 0 0 1 0 1H.5a.5.5 0 0 1 0-1H1v-3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3h1V7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7h1V2zm1 12h2V2h-2v12zm-3 0V7H7v7h2zm-5 0v-3H2v3h2z"/></svg>',
+                shortDescription: "Distribution of annual performance ratings across workforce",
+                fullDescription: "Shows the distribution of performance ratings following the annual review cycle. Helps identify rating inflation/deflation and ensures fair performance management practices.",
+                calculation: "COUNT([Employee ID]) by [Performance Rating]",
+                usage: "Calibrate performance standards, identify high performers for development, and ensure rating distribution aligns with organizational expectations.",
+                tags: ["performance", "ratings", "review", "distribution", "talent"],
+                chartData: {
+                    type: "bar",
+                    data: [8, 45, 142, 68, 12],
+                    labels: ["Needs Improvement", "Meets Some", "Meets All", "Exceeds", "Outstanding"]
+                }
+            },
+            {
+                id: 13,
+                name: "Exit Interview Sentiment",
+                category: "Retention",
+                dashboard: "Exit Interview Dashboard",
+                type: "Word Cloud",
+                icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-chat-dots" viewBox="0 0 16 16"><path d="M5 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/><path d="m2.165 15.803.02-.004c1.83-.363 2.948-.842 3.468-1.105A9.06 9.06 0 0 0 8 15c4.418 0 8-3.134 8-7s-3.582-7-8-7-8 3.134-8 7c0 1.76.743 3.37 1.97 4.6a10.437 10.437 0 0 1-.524 2.318l-.003.011a10.722 10.722 0 0 1-.244.637c-.079.186.074.394.273.362a21.673 21.673 0 0 0 .693-.125zm.8-3.108a1 1 0 0 0-.287-.801C1.618 10.83 1 9.468 1 8c0-3.192 3.004-6 7-6s7 2.808 7 6c0 3.193-3.004 6-7 6a8.06 8.06 0 0 1-2.088-.272 1 1 0 0 0-.711.074c-.387.196-1.24.57-2.634.893a10.97 10.97 0 0 0 .398-2z"/></svg>',
+                shortDescription: "Common themes from exit interview feedback",
+                fullDescription: "Analysis of exit interview responses highlighting the most frequently mentioned topics and sentiments. Provides qualitative insights into why employees leave.",
+                calculation: "Text analysis of exit interview responses with frequency weighting",
+                usage: "Identify recurring themes in exit feedback, understand employee pain points, and develop targeted retention strategies based on actual employee experiences.",
+                tags: ["exit-interview", "feedback", "sentiment", "qualitative", "themes"],
+                chartData: {
+                    type: "bar",
+                    data: [89, 76, 64, 52, 41],
+                    labels: ["Career Growth", "Work-Life Balance", "Compensation", "Management", "Culture"]
+                }
+            },
+            {
+                id: 14,
+                name: "Compensation Ratio Analysis",
+                category: "Compensation",
+                dashboard: "HR Reports",
+                type: "Box Plot",
+                icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-currency-dollar" viewBox="0 0 16 16"><path d="M4 10.781c.148 1.667 1.513 2.85 3.591 3.003V15h1.043v-1.216c2.27-.179 3.678-1.438 3.678-3.3 0-1.59-.947-2.51-2.956-3.028l-.722-.187V3.467c1.122.11 1.879.714 2.07 1.616h1.47c-.166-1.6-1.54-2.748-3.54-2.875V1H7.591v1.233c-1.939.23-3.27 1.472-3.27 3.156 0 1.454.966 2.483 2.661 2.917l.61.162v4.031c-1.149-.17-1.94-.8-2.131-1.718H4zm3.391-3.836c-1.043-.263-1.6-.825-1.6-1.616 0-.944.704-1.641 1.8-1.828v3.495l-.2-.05zm1.591 1.872c1.287.323 1.852.859 1.852 1.769 0 1.097-.826 1.828-2.2 1.939V8.73l.348.086z"/></svg>',
+                shortDescription: "Pay equity analysis comparing compensation ratios",
+                fullDescription: "Analyzes compensation ratios across different demographics, levels, and departments to ensure pay equity. Shows median, quartiles, and outliers for comprehensive pay analysis.",
+                calculation: "Employee Salary / Market Midpoint, grouped by relevant dimensions",
+                usage: "Ensure pay equity, identify compensation outliers, support fair pay initiatives, and maintain competitive compensation positioning.",
+                tags: ["compensation", "pay-equity", "salary", "analysis", "fairness"],
+                chartData: {
+                    type: "bar",
+                    data: [0.95, 1.02, 0.98, 1.05, 0.97, 1.01],
+                    labels: ["Entry", "Junior", "Mid", "Senior", "Lead", "Executive"]
+                }
+            },
+            {
+                id: 15,
+                name: "Absence Rate Tracker",
+                category: "Attendance",
+                dashboard: "Workforce Analytics Dashboard",
+                type: "Heat Map",
+                icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-calendar-x" viewBox="0 0 16 16"><path d="M6.146 7.146a.5.5 0 0 1 .708 0L8 8.293l1.146-1.147a.5.5 0 1 1 .708.708L8.707 9l1.147 1.146a.5.5 0 0 1-.708.708L8 9.707l-1.146 1.147a.5.5 0 0 1-.708-.708L7.293 9 6.146 7.854a.5.5 0 0 1 0-.708z"/><path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/></svg>',
+                shortDescription: "Monthly absence rates by department",
+                fullDescription: "Heat map visualization showing absence patterns across departments and time periods. Helps identify trends, seasonal variations, and departments requiring support.",
+                calculation: "(Total Days Absent / Total Working Days) × 100",
+                usage: "Monitor attendance patterns, identify potential burnout or engagement issues, and plan coverage for high-absence periods.",
+                tags: ["absence", "attendance", "patterns", "health", "productivity"],
+                chartData: {
+                    type: "bar",
+                    data: [3.2, 2.8, 4.1, 3.5, 2.9, 3.8],
+                    labels: ["Engineering", "Sales", "Marketing", "Operations", "HR", "Finance"]
+                }
+            },
+            {
+                id: 16,
+                name: "Succession Planning Pipeline",
+                category: "Career Development",
+                dashboard: "Workforce Analytics Dashboard",
+                type: "Funnel Chart",
+                icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-diagram-3" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M6 3.5A1.5 1.5 0 0 1 7.5 2h1A1.5 1.5 0 0 1 10 3.5v1A1.5 1.5 0 0 1 8.5 6v1H14a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-1 0V8h-5v.5a.5.5 0 0 1-1 0V8h-5v.5a.5.5 0 0 1-1 0v-1A.5.5 0 0 1 2 7h5.5V6A1.5 1.5 0 0 1 6 4.5v-1zM8.5 5a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1zM0 11.5A1.5 1.5 0 0 1 1.5 10h1A1.5 1.5 0 0 1 4 11.5v1A1.5 1.5 0 0 1 2.5 14h-1A1.5 1.5 0 0 1 0 12.5v-1zm1.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1zm4.5.5A1.5 1.5 0 0 1 7.5 10h1a1.5 1.5 0 0 1 1.5 1.5v1A1.5 1.5 0 0 1 8.5 14h-1A1.5 1.5 0 0 1 6 12.5v-1zm1.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1zm4.5.5a1.5 1.5 0 0 1 1.5-1.5h1a1.5 1.5 0 0 1 1.5 1.5v1a1.5 1.5 0 0 1-1.5 1.5h-1a1.5 1.5 0 0 1-1.5-1.5v-1zm1.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1z"/></svg>',
+                shortDescription: "Leadership pipeline and succession readiness",
+                fullDescription: "Visualizes the talent pipeline for critical roles, showing the number of ready-now, ready-in-1-year, and ready-in-3-years candidates for key positions.",
+                calculation: "COUNT([Succession Candidates]) by [Readiness Level] and [Target Role]",
+                usage: "Assess organizational bench strength, identify succession gaps, and prioritize development investments for future leaders.",
+                tags: ["succession", "leadership", "pipeline", "talent", "development"],
+                chartData: {
+                    type: "bar",
+                    data: [45, 28, 12, 6],
+                    labels: ["High Potential", "Ready 3yr", "Ready 1yr", "Ready Now"]
+                }
+            }
+        ];
+        
+        let isDarkMode = false;
+        let charts = {};
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if Chart.js is loaded
+            if (typeof Chart === 'undefined') {
+                console.error('Chart.js failed to load. The application will work without charts.');
+                // Still render items but without charts
+                renderItems(dataItems);
+            } else {
+                console.log('Chart.js loaded successfully');
+                renderItems(dataItems);
+            }
+        });
+
+        // Dark mode toggle
+        function toggleDarkMode() {
+            isDarkMode = !isDarkMode;
+            document.body.classList.toggle('dark', isDarkMode);
+            const toggleBtn = document.getElementById('darkModeIcon');
+            toggleBtn.textContent = isDarkMode ? '☀️' : '🌙';
+            
+            // Update chart colors for dark mode
+            Object.values(charts).forEach(chart => {
+                if (chart && chart.options) {
+                    updateChartColors(chart);
+                    chart.update();
+                }
+            });
+        }
+
+        // Filter items
+        function filterItems() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const selectedDashboard = document.getElementById('dashboardSelect').value;
+            const selectedCategory = document.getElementById('categorySelect').value;
+
+            const filtered = dataItems.filter(item => {
+                const matchesSearch = item.name.toLowerCase().includes(searchTerm) ||
+                                     item.shortDescription.toLowerCase().includes(searchTerm) ||
+                                     item.tags.some(tag => tag.toLowerCase().includes(searchTerm));
+                const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
+                const matchesDashboard = selectedDashboard === 'All HRIS Analytics' || item.dashboard === selectedDashboard;
+                return matchesSearch && matchesCategory && matchesDashboard;
+            });
+
+            renderItems(filtered);
+        }
+
+        // Get chart colors based on theme
+        function getChartColors() {
+            return isDarkMode ? {
+                primary: '#69a8c6',
+                background: 'rgba(105, 168, 198, 0.1)',
+                text: '#ffffff',
+                grid: '#484644',
+                colors: ['#d47d6c', '#a4cadc', '#cf862e', '#e4d58d', '#74828d', '#939ca2', '#4d8892', '#69a8c6']
+            } : {
+                primary: '#69a8c6',
+                background: 'rgba(105, 168, 198, 0.1)',
+                text: '#374151',
+                grid: '#e5e7eb',
+                colors: ['#d47d6c', '#a4cadc', '#cf862e', '#e4d58d', '#74828d', '#939ca2', '#4d8892', '#69a8c6']
+            };
+        }
+
+        // Update chart colors for theme
+        function updateChartColors(chart) {
+            const colors = getChartColors();
+            
+            if (chart.options.scales) {
+                if (chart.options.scales.x) {
+                    chart.options.scales.x.ticks.color = colors.text;
+                    chart.options.scales.x.grid.color = colors.grid;
+                }
+                if (chart.options.scales.y) {
+                    chart.options.scales.y.ticks.color = colors.text;
+                    chart.options.scales.y.grid.color = colors.grid;
+                }
+            }
+            
+            if (chart.options.plugins && chart.options.plugins.legend) {
+                chart.options.plugins.legend.labels.color = colors.text;
+            }
+        }
+
+        // Create mini chart
+        function createMiniChart(canvasId, chartData) {
+            // Check if Chart.js is available
+            if (typeof Chart === 'undefined') {
+                console.warn('Chart.js not available, skipping chart creation');
+                return null;
+            }
+            
+            const ctx = document.getElementById(canvasId);
+            if (!ctx) return null;
+
+            const colors = getChartColors();
+            
+            try {
+                const config = {
+                    type: chartData.type,
+                    data: {
+                        labels: chartData.labels,
+                        datasets: [{
+                            data: chartData.data,
+                            backgroundColor: chartData.type === 'line' ? colors.background : colors.colors,
+                            borderColor: chartData.type === 'line' ? colors.primary : colors.colors,
+                            borderWidth: chartData.type === 'line' ? 3 : 1,
+                            fill: chartData.type === 'line' ? true : false,
+                            tension: chartData.type === 'line' ? 0.4 : 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: chartData.type === 'doughnut',
+                                position: 'bottom',
+                                labels: {
+                                    color: colors.text,
+                                    font: { size: 10 },
+                                    padding: 8
+                                }
+                            }
+                        },
+                        scales: chartData.type === 'doughnut' ? {} : {
+                            x: {
+                                display: true,
+                                ticks: {
+                                    color: colors.text,
+                                    font: { size: 9 }
+                                },
+                                grid: {
+                                    color: colors.grid,
+                                    lineWidth: 0.5
+                                }
+                            },
+                            y: {
+                                display: true,
+                                ticks: {
+                                    color: colors.text,
+                                    font: { size: 9 }
+                                },
+                                grid: {
+                                    color: colors.grid,
+                                    lineWidth: 0.5
+                                }
+                            }
+                        }
+                    }
+                };
+
+                const chart = new Chart(ctx, config);
+                charts[canvasId] = chart;
+                return chart;
+            } catch (error) {
+                console.error('Error creating chart:', error);
+                return null;
+            }
+        }
+
+        // Render items
+        function renderItems(items) {
+            const grid = document.getElementById('resultsGrid');
+            const noResults = document.getElementById('noResults');
+
+            // Clear existing charts
+            Object.values(charts).forEach(chart => {
+                if (chart) chart.destroy();
+            });
+            charts = {};
+
+            if (items.length === 0) {
+                grid.classList.add('hidden');
+                noResults.classList.remove('hidden');
+                return;
+            }
+
+            grid.classList.remove('hidden');
+            noResults.classList.add('hidden');
+
+            grid.innerHTML = items.map(item => `
+                <div class="card" onclick="openModal(${item.id})">
+                    <div class="card-header">
+                        <div class="card-title-area">
+                            <div class="card-icon">
+                                ${item.icon}
+                            </div>
+                            <div>
+                                <div class="card-title">${item.name}</div>
+                                <div class="card-type">${item.type}</div>
+                            </div>
+                        </div>
+                        <div class="badge">${item.category}</div>
+                    </div>
+                    
+                    ${item.chartData && typeof Chart !== 'undefined' ? `
+                    <div class="chart-container">
+                        <canvas id="chart-${item.id}" class="chart-canvas"></canvas>
+                    </div>
+                    ` : ''}
+                    
+                    <div class="card-description">${item.shortDescription}</div>
+                    
+                    <div class="card-footer">
+                        <div class="tags">
+                            ${item.tags.slice(0, 2).map(tag => `<span class="tag">${tag}</span>`).join('')}
+                            ${item.tags.length > 2 ? `<span class="tag">+${item.tags.length - 2}</span>` : ''}
+                        </div>
+                        <div class="view-details">
+                            <span class="view-icon">👁</span>
+                            <span>View Details</span>
+                            <span class="arrow-icon">→</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Create charts after DOM is updated
+            if (typeof Chart !== 'undefined') {
+                setTimeout(() => {
+                    items.forEach(item => {
+                        if (item.chartData) {
+                            createMiniChart(`chart-${item.id}`, item.chartData);
+                        }
+                    });
+                }, 100);
+            }
+        }
+
+        // Open modal
+        function openModal(itemId) {
+            const item = dataItems.find(i => i.id === itemId);
+            if (!item) return;
+
+            document.getElementById('modalIcon').innerHTML = item.icon;
+            document.getElementById('modalTitle').textContent = item.name;
+            document.getElementById('modalSubtitle').textContent = `${item.type} • ${item.category}`;
+
+            const modalBody = document.getElementById('modalBody');
+            modalBody.innerHTML = `
+                ${item.chartData ? `
+                <div class="modal-section">
+                    <div class="section-title">
+                        📊 Visual Example
+                    </div>
+                    <div class="modal-chart-container">
+                        <canvas id="modal-chart-${item.id}" style="width: 100%; height: 100%;"></canvas>
+                    </div>
+                </div>
+                ` : ''}
+                
+                <div class="modal-section">
+                    <div class="section-title">
+                        ℹ️ Description
+                    </div>
+                    <div class="section-content">${item.fullDescription}</div>
+                </div>
+                
+                ${item.calculation ? `
+                <div class="modal-section">
+                    <div class="section-title">
+                        🧮 Calculation
+                    </div>
+                    <div class="code-block">${item.calculation}</div>
+                </div>
+                ` : ''}
+                
+                <div class="modal-section">
+                    <div class="section-title">
+                        💡 How to Use
+                    </div>
+                    <div class="section-content">${item.usage}</div>
+                </div>
+                
+                <div class="modal-section">
+                    <div class="section-title">
+                        🏷️ Tags
+                    </div>
+                    <div class="modal-tags">
+                        ${item.tags.map(tag => `<span class="modal-tag">${tag}</span>`).join(' ')}
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('modal').classList.add('show');
+
+            // Create modal chart
+            if (item.chartData) {
+                setTimeout(() => {
+                    createMiniChart(`modal-chart-${item.id}`, item.chartData);
+                }, 100);
+            }
+        }
+
+        // Close modal
+        function closeModal(event) {
+            if (event && event.target !== event.currentTarget) return;
+            document.getElementById('modal').classList.remove('show');
+            
+            // Clean up modal charts
+            Object.keys(charts).forEach(key => {
+                if (key.startsWith('modal-chart-')) {
+                    if (charts[key]) charts[key].destroy();
+                    delete charts[key];
+                }
+            });
+        }
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
