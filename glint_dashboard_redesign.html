@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glint - Employee Engagement Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f6fa;
+            min-height: 100vh;
+            color: #2c3e50;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid #e1e8ed;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1565c0;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            list-style: none;
+        }
+
+        .nav-links span {
+            color: #546e7a;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 0;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .nav-links span:hover {
+            color: #1976d2;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: #546e7a;
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #1565c0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        /* Main content container */
+        .page-content {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Tooltip Styles */
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            line-height: 1.4;
+            max-width: 250px;
+            z-index: 1000;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .tooltip.show {
+            opacity: 1;
+        }
+
+        .tooltip::before {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: rgba(0, 0, 0, 0.9);
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="nav-left">
+            <div class="logo">Glint</div>
+            <ul class="nav-links">
+                <li><span class="nav-link" data-page="dashboard">Dashboard</span></li>
+                <li><span class="nav-link" data-page="goals">Goals</span></li>
+                <li><span class="nav-link" data-page="reports" id="reports-link">Reports</span></li>
+            </ul>
+        </div>
+        <div class="user-info">
+            <span>Sarah Chen</span>
+            <div class="avatar">SC</div>
+        </div>
+    </header>
+
+    <div id="app-content" class="page-content">
+        <!-- Content will be loaded here -->
+    </div>
+
+    <!-- Tooltip Container -->
+    <div id="tooltip" class="tooltip"></div>
+
+    <script>
+        // Page content templates
+        const pages = {
+            dashboard: `
+                <div class="page-header" style="margin-bottom: 2rem;">
+                    <h1 style="font-size: 1.5rem; font-weight: 600; color: #2c3e50; margin-bottom: 0.5rem;">Executive Summary Report</h1>
+                    <div style="color: #78909c; font-size: 0.875rem;">
+                        A.U.TI > Engagement and Mores > Glint > Q4 Engagement and Mores Pulse > Ask a Pilot
+                    </div>
+                </div>
+
+                <!-- Pulse Overview Section -->
+                <div style="margin-bottom: 2rem;">
+                    <h2 style="font-size: 1rem; font-weight: 600; color: #455a64; margin-bottom: 1rem;">Pulse Overview</h2>
+                    <div style="background: white; border-radius: 8px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); border: 1px solid #e1e8ed; margin-bottom: 1.5rem;">
+                        <div style="display: grid; grid-template-columns: 300px 1fr 200px 200px; gap: 2rem; align-items: center;">
+                            <!-- Main Score -->
+                            <div class="interactive" 
+                                 data-tooltip="Overall Engagement Score: 82/100<br/>Previous Quarter: 81 (+1 improvement)<br/>Benchmark: 78 (Industry Average)<br/>Based on responses from 1,247 employees"
+                                 style="background: linear-gradient(135deg, #1976d2, #1565c0); color: white; padding: 2rem; border-radius: 8px; text-align: center; position: relative; cursor: pointer;">
+                                <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 0.5rem;">Q4 Engagement Index</div>
+                                <div style="font-size: 4rem; font-weight: 300; line-height: 1; margin-bottom: 0.5rem;">82</div>
+                                <div style="font-size: 0.875rem; opacity: 0.9;">↗ +1</div>
+                            </div>
+
+                            <!-- Trend Chart -->
+                            <div style="text-align: center;">
+                                <div style="font-size: 0.875rem; color: #546e7a; margin-bottom: 1rem;">Engagement Index Historical Trend</div>
+                                <div style="height: 80px; background: #f8f9fa; border-radius: 4px; position: relative; overflow: hidden;">
+                                    <svg style="position: absolute; bottom: 10px; left: 10px; right: 10px; height: 60px; width: calc(100% - 20px);" viewBox="0 0 240 60">
+                                        <path d="M10,50 L50,45 L90,47 L130,42 L170,40 L210,35 L240,30" fill="none" stroke="#1976d2" stroke-width="2"/>
+                                        <circle cx="240" cy="30" r="3" fill="#1976d2"/>
+                                    </svg>
+                                </div>
+                            </div>
+
+                            <!-- Response Rate -->
+                            <div class="interactive"
+                                 data-tooltip="Response Rate: 76%<br/>Total Invited: 1,640 employees<br/>Total Responses: 1,247<br/>Previous Pulse: 72% (+4% improvement)<br/>Industry Benchmark: 68%"
+                                 style="text-align: center; cursor: pointer;">
+                                <div style="font-size: 2.5rem; font-weight: 300; color: #1565c0; line-height: 1;">76%</div>
+                                <div style="font-size: 0.875rem; color: #546e7a; margin-top: 0.25rem;">eNPS Responses</div>
+                                <div style="font-size: 0.75rem; color: #78909c; margin-top: 0.25rem;">7% vs prior Pulse</div>
+                            </div>
+
+                            <!-- Comments -->
+                            <div class="interactive"
+                                 data-tooltip="Total Comments: 5,400<br/>Positive Sentiment: 58%<br/>Neutral Sentiment: 17%<br/>Concerns Raised: 25%<br/>Average Length: 47 words"
+                                 style="text-align: center; cursor: pointer;">
+                                <div style="font-size: 2.5rem; font-weight: 300; color: #1565c0; line-height: 1;">5.4k</div>
+                                <div style="font-size: 0.875rem; color: #546e7a; margin-top: 0.25rem;">Comments</div>
+                                <div class="interactive"
+                                     data-tooltip="Response Distribution:<br/>Favorable: 58% (3,132 responses)<br/>Neutral: 17% (918 responses)<br/>Unfavorable: 25% (1,350 responses)"
+                                     style="width: 120px; height: 120px; border-radius: 50%; background: conic-gradient(#1976d2 0deg 208deg, #42a5f5 208deg 269deg, #e57373 269deg 360deg); position: relative; margin: 0.5rem auto; cursor: pointer;">
+                                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; color: #546e7a;">Response<br>Split</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- History Section -->
+                <div style="margin-bottom: 2rem;">
+                    <h2 style="font-size: 1rem; font-weight: 600; color: #455a64; margin-bottom: 1rem;">History</h2>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                        <!-- Engagement Trend -->
+                        <div class="interactive" style="background: white; border-radius: 8px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); border: 1px solid #e1e8ed; cursor: pointer;">
+                            <h3 style="font-size: 1rem; font-weight: 600; color: #455a64; margin-bottom: 1rem;">Engagement Index and Response Rate</h3>
+                            <div style="height: 200px; position: relative;">
+                                <svg style="width: 100%; height: 100%;" viewBox="0 0 400 160">
+                                    <!-- Grid Lines -->
+                                    <g>
+                                        <line style="stroke: #eceff1; stroke-width: 1;" x1="40" y1="140" x2="360" y2="140" />
+                                        <line style="stroke: #eceff1; stroke-width: 1;" x1="40" y1="110" x2="360" y2="110" />
+                                        <line style="stroke: #eceff1; stroke-width: 1;" x1="40" y1="80" x2="360" y2="80" />
+                                        <line style="stroke: #eceff1; stroke-width: 1;" x1="40" y1="50" x2="360" y2="50" />
+                                    </g>
+                                    
+                                    <!-- Axis Labels -->
+                                    <text style="fill: #78909c; font-size: 11px;" x="30" y="145">70</text>
+                                    <text style="fill: #78909c; font-size: 11px;" x="30" y="115">75</text>
+                                    <text style="fill: #78909c; font-size: 11px;" x="30" y="85">80</text>
+                                    <text style="fill: #78909c; font-size: 11px;" x="30" y="55">85</text>
+                                    
+                                    <text style="fill: #78909c; font-size: 11px;" x="60" y="155">Jan '24</text>
+                                    <text style="fill: #78909c; font-size: 11px;" x="140" y="155">Apr '24</text>
+                                    <text style="fill: #78909c; font-size: 11px;" x="220" y="155">Jul '24</text>
+                                    <text style="fill: #78909c; font-size: 11px;" x="300" y="155">Oct '24</text>
+                                    
+                                    <!-- Trend Area -->
+                                    <path style="fill: #e3f2fd; opacity: 0.6;" d="M60,110 L120,105 L180,108 L240,100 L300,95 L340,90 L340,140 L60,140 Z" />
+                                    
+                                    <!-- Trend Line -->
+                                    <path style="fill: none; stroke: #1976d2; stroke-width: 2;" d="M60,110 L120,105 L180,108 L240,100 L300,95 L340,90" />
+                                    
+                                    <!-- Data Points -->
+                                    <circle class="trend-point" data-tooltip="January 2024<br/>Engagement Score: 78<br/>Response Rate: 74%<br/>Change: +2 from Q4 2023" style="fill: #1976d2; cursor: pointer;" cx="60" cy="110" r="3" />
+                                    <circle class="trend-point" data-tooltip="March 2024<br/>Engagement Score: 79<br/>Response Rate: 76%<br/>Change: +1 from January" style="fill: #1976d2; cursor: pointer;" cx="120" cy="105" r="3" />
+                                    <circle class="trend-point" data-tooltip="May 2024<br/>Engagement Score: 78<br/>Response Rate: 73%<br/>Change: -1 from March" style="fill: #1976d2; cursor: pointer;" cx="180" cy="108" r="3" />
+                                    <circle class="trend-point" data-tooltip="July 2024<br/>Engagement Score: 80<br/>Response Rate: 75%<br/>Change: +2 from May" style="fill: #1976d2; cursor: pointer;" cx="240" cy="100" r="3" />
+                                    <circle class="trend-point" data-tooltip="September 2024<br/>Engagement Score: 81<br/>Response Rate: 72%<br/>Change: +1 from July" style="fill: #1976d2; cursor: pointer;" cx="300" cy="95" r="3" />
+                                    <circle class="trend-point" data-tooltip="December 2024<br/>Engagement Score: 82<br/>Response Rate: 76%<br/>Change: +1 from September" style="fill: #1976d2; cursor: pointer;" cx="340" cy="90" r="3" />
+                                </svg>
+                            </div>
+                        </div>
+
+                        <!-- Favorable vs Unfavorable -->
+                        <div class="interactive"
+                             data-tooltip="Favorable vs Unfavorable Trends<br/>Current Quarter: 75% Favorable, 25% Unfavorable<br/>Trend: +5% improvement in favorable responses<br/>Goal: Reach 80% favorable by Q2 2025"
+                             style="background: white; border-radius: 8px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); border: 1px solid #e1e8ed; cursor: pointer;">
+                            <h3 style="font-size: 1rem; font-weight: 600; color: #455a64; margin-bottom: 1rem;">Favorable and Unfavorable</h3>
+                            <div style="height: 160px; background: #1976d2; border-radius: 4px; position: relative; overflow: hidden;">
+                                <div style="position: absolute; top: 0; left: 0; right: 0; height: 25%; background: #e57373;"></div>
+                                <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 75%; background: #1976d2;"></div>
+                                <div style="position: absolute; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; padding: 0.5rem; background: rgba(255, 255, 255, 0.9); font-size: 0.75rem; color: #546e7a;">
+                                    <span>Q1 '24</span>
+                                    <span>Q2 '24</span>
+                                    <span>Q3 '24</span>
+                                    <span>Q4 '24</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Strengths and Opportunities -->
+                <div style="background: white; border-radius: 8px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); border: 1px solid #e1e8ed; margin-bottom: 2rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h2 style="font-size: 1rem; font-weight: 600; color: #455a64; margin: 0;">Strengths and Opportunities ●</h2>
+                        <a href="#" style="font-size: 0.875rem; color: #1976d2; text-decoration: none;">Collapsed ⏷ Ungrouped</a>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                        <div>
+                            <h4 style="font-size: 0.875rem; color: #546e7a; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.5px;">Top Strengths</h4>
+                            
+                            <div class="interactive" data-tooltip="Growth & Development Strength<br/>Score: 84/100<br/>Key Drivers: Learning opportunities, mentorship programs<br/>Employee Feedback: 'Great career development support'" style="display: flex; align-items: flex-start; gap: 0.75rem; margin-bottom: 1rem; padding: 0.75rem; background: #f8f9fa; border-radius: 6px; cursor: pointer;">
+                                <div style="width: 8px; height: 8px; border-radius: 50%; background: #1976d2; margin-top: 0.375rem; flex-shrink: 0;"></div>
+                                <div>
+                                    <h5 style="font-size: 0.875rem; font-weight: 600; color: #2c3e50; margin-bottom: 0.25rem;">Growth & Development</h5>
+                                    <p style="font-size: 0.8rem; color: #546e7a; line-height: 1.4; margin: 0;">Strong learning culture with excellent mentorship opportunities. Employees feel supported in their career journey.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="interactive" data-tooltip="Manager Relationships & Collaboration<br/>Score: 81/100<br/>Key Drivers: Cross-functional teamwork, manager support<br/>Improvement: +3 points from last quarter" style="display: flex; align-items: flex-start; gap: 0.75rem; margin-bottom: 1rem; padding: 0.75rem; background: #f8f9fa; border-radius: 6px; cursor: pointer;">
+                                <div style="width: 8px; height: 8px; border-radius: 50%; background: #1976d2; margin-top: 0.375rem; flex-shrink: 0;"></div>
+                                <div>
+                                    <h5 style="font-size: 0.875rem; font-weight: 600; color: #2c3e50; margin-bottom: 0.25rem;">Manager > Relationships > Collaboration</h5>
+                                    <p style="font-size: 0.8rem; color: #546e7a; line-height: 1.4; margin: 0;">Collaborative work environment with strong cross-functional teams. High commitment levels among staff members.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="interactive" data-tooltip="Working Relationships<br/>Score: 79/100<br/>Key Drivers: Team communication, remote work effectiveness<br/>Trend: Steady improvement over 6 months" style="display: flex; align-items: flex-start; gap: 0.75rem; margin-bottom: 1rem; padding: 0.75rem; background: #f8f9fa; border-radius: 6px; cursor: pointer;">
+                                <div style="width: 8px; height: 8px; border-radius: 50%; background: #1976d2; margin-top: 0.375rem; flex-shrink: 0;"></div>
+                                <div>
+                                    <h5 style="font-size: 0.875rem; font-weight: 600; color: #2c3e50; margin-bottom: 0.25rem;">Manager > Relationships > Working</h5>
+                                    <p style="font-size: 0.8rem; color: #546e7a; line-height: 1.4; margin: 0;">Positive workplace relationships and effective team communication. Strong foundation for remote and hybrid work.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 style="font-size: 0.875rem; color: #546e7a; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.5px;">Top Opportunities</h4>
+                            
+                            <div class="interactive" data-tooltip="Stress Management - Critical Issue<br/>Score: 58/100 (Down 8 points)<br/>Affected: 340+ employees report high stress<br/>Action Required: Immediate workload assessment" style="display: flex; align-items: flex-start; gap: 0.75rem; margin-bottom: 1rem; padding: 0.75rem; background: #f8f9fa; border-radius: 6px; cursor: pointer;">
+                                <div style="width: 8px; height: 8px; border-radius: 50%; background: #e57373; margin-top: 0.375rem; flex-shrink: 0;"></div>
+                                <div>
+                                    <h5 style="font-size: 0.875rem; font-weight: 600; color: #2c3e50; margin-bottom: 0.25rem;">Min 2 > Stress</h5>
+                                    <p style="font-size: 0.8rem; color: #546e7a; line-height: 1.4; margin: 0;">Many employees feel overwhelmed by workload. Need more sustainable work practices.</p>
+                                    <span style="display: inline-block; padding: 0.125rem 0.5rem; border-radius: 12px; font-size: 0.7rem; font-weight: 500; margin-top: 0.5rem; background: #ffcdd2; color: #d32f2f;">Critical</span>
+                                </div>
+                            </div>
+                            
+                            <div class="interactive" data-tooltip="Staff Resources Issue<br/>Score: 65/100<br/>Key Concerns: Insufficient tools, limited budget<br/>Departments Affected: Engineering, Marketing" style="display: flex; align-items: flex-start; gap: 0.75rem; margin-bottom: 1rem; padding: 0.75rem; background: #f8f9fa; border-radius: 6px; cursor: pointer;">
+                                <div style="width: 8px; height: 8px; border-radius: 50%; background: #ff7043; margin-top: 0.375rem; flex-shrink: 0;"></div>
+                                <div>
+                                    <h5 style="font-size: 0.875rem; font-weight: 600; color: #2c3e50; margin-bottom: 0.25rem;">Manager > Manager - Staff Resources</h5>
+                                    <p style="font-size: 0.8rem; color: #546e7a; line-height: 1.4; margin: 0;">Staff need more resources to get work done effectively.</p>
+                                    <span style="display: inline-block; padding: 0.125rem 0.5rem; border-radius: 12px; font-size: 0.7rem; font-weight: 500; margin-top: 0.5rem; background: #ffebee; color: #c62828;">High Priority</span>
+                                </div>
+                            </div>
+                            
+                            <div class="interactive" data-tooltip="Workload Control - Critical Issue<br/>Score: 55/100 (Down 6 points)<br/>Affected: 280+ employees feel overwhelmed<br/>Related to: Stress management concerns" style="display: flex; align-items: flex-start; gap: 0.75rem; margin-bottom: 1rem; padding: 0.75rem; background: #f8f9fa; border-radius: 6px; cursor: pointer;">
+                                <div style="width: 8px; height: 8px; border-radius: 50%; background: #e57373; margin-top: 0.375rem; flex-shrink: 0;"></div>
+                                <div>
+                                    <h5 style="font-size: 0.875rem; font-weight: 600; color: #2c3e50; margin-bottom: 0.25rem;">Min 2 > Control on Workload</h5>
+                                    <p style="font-size: 0.8rem; color: #546e7a; line-height: 1.4; margin: 0;">Workload feels out of control for many team members.</p>
+                                    <span style="display: inline-block; padding: 0.125rem 0.5rem; border-radius: 12px; font-size: 0.7rem; font-weight: 500; margin-top: 0.5rem; background: #ffcdd2; color: #d32f2f;">Critical</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Scores Section -->
+                <div style="background: white; border-radius: 8px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); border: 1px solid #e1e8ed;">
+                    <h2 style="font-size: 1rem; font-weight: 600; color: #455a64; margin-bottom: 1.5rem;">Scores</h2>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr>
+                                <th style="text-align: left; padding: 0.75rem 0.5rem; font-size: 0.875rem; font-weight: 600; color: #455a64; border-bottom: 1px solid #e1e8ed;">Question</th>
+                                <th style="text-align: left; padding: 0.75rem 0.5rem; font-size: 0.875rem; font-weight: 600; color: #455a64; border-bottom: 1px solid #e1e8ed;">Score</th>
+                                <th style="text-align: left; padding: 0.75rem 0.5rem; font-size: 0.875rem; font-weight: 600; color: #455a64; border-bottom: 1px solid #e1e8ed;">vs Organization</th>
+                                <th style="text-align: left; padding: 0.75rem 0.5rem; font-size: 0.875rem; font-weight: 600; color: #455a64; border-bottom: 1px solid #e1e8ed;">Change</th>
+                                <th style="text-align: left; padding: 0.75rem 0.5rem; font-size: 0.875rem; font-weight: 600; color: #455a64; border-bottom: 1px solid #e1e8ed;">vs Previous</th>
+                                <th style="text-align: left; padding: 0.75rem 0.5rem; font-size: 0.875rem; font-weight: 600; color: #455a64; border-bottom: 1px solid #e1e8ed;">Benchmark</th>
+                                <th style="text-align: left; padding: 0.75rem 0.5rem; font-size: 0.875rem; font-weight: 600; color: #455a64; border-bottom: 1px solid #e1e8ed;">Questions</th>
+                                <th style="text-align: left; padding: 0.75rem 0.5rem; font-size: 0.875rem; font-weight: 600; color: #455a64; border-bottom: 1px solid #e1e8ed;">Comments</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="interactive" data-tooltip="Growth Mindset Category<br/>Score: 84/100<br/>Questions: 5 items measured<br/>Top Performer: +2 improvement<br/>Comments: 47 positive mentions" style="cursor: pointer;">
+                                <td style="padding: 0.75rem 0.5rem; font-size: 0.875rem; color: #546e7a; border-bottom: 1px solid #f5f6fa;">• Growth Mindset</td>
+                                <td style="padding: 0.75rem 0.5rem; font-size: 0.875rem; color: #546e7a; border-bottom: 1px solid #f5f6fa;"><strong>84</strong></td>
+                                <td style="padding: 0.75rem 0.5rem; font-size: 0.875rem; color: #546e7a; border-bottom: 1px solid #f5f6fa;"><div style="width: 60px; height: 6px; background: #e1e8ed; border-radius: 3px; overflow: hidden;"><div style="height: 100%; background: #1976d2; border-radius: 3px; width: 84%;"></div></div></td>
+                                <td style="padding: 0.75rem 0.5rem; font-size: 0.875rem; color: #1976d2; border-bottom: 1px solid #f5f6fa;">↗ +2</td>
+                                <td style="padding: 0.75rem 0.5rem; font-size: 0.875rem; color: #546e7a; border-bottom: 1px solid #f5f6fa;"><strong>↗ Favorable</strong></td>
+                                <td style="padding: 0.75rem 0.5rem; font-size: 0.875rem; color: #546e7a; border-bottom: 1px solid #f5f6fa;">External</td>
+                                <td style="padding: 0.75rem 0.5rem; font-size: 0.875rem; color: #546e7a; border-bottom: 1px solid #f5f6fa;">5</td>
+                                <td style="padding: 0.75rem 0.5rem; font-size: 0.875rem; color: #546e7a; border-bottom: 1px solid #f5f6fa;">2 Questions Comments</td>
+                            </tr>
+                            <tr class="interactive" data-tooltip="Work-Life Balance - Declining<br/>Score: 68/100 (Warning Zone)<br/>Down 5 points from last quarter<br/>Key Issues: Long hours, weekend work<br/>Action Required: Review workload distribution" style="cursor: pointer;">
+                                <td style="padding: 0.75rem 0.5rem; font-size: 0.875rem; color: #546e7a; border-bottom: 1px solid #f5f6fa;">• Work-Life Balance</td>
+                                <td style="padding: 0.75rem 0.5rem; font-size: 0.875rem; color: #546e7a; border-bottom: 1px solid #f5f6fa;"><strong>68</strong></td>
+                                <td style="padding: 0.75rem 0.5rem; font-size: 0.875rem; color: #546e7a; border-bottom: 1px solid #f5f6fa;"><div style="width: 60px; height: 6px; background: #e1e8ed; border-radius: 3px; overflow: hidden;"><div style="height: 100%; background: #ffa726; border-radius: 3px; width: 68%;"></div></div></td>
+                                <td style="padding: 0.75rem 0.5rem; font-size: 0.875rem; color: #e57373; border-bottom: 1px solid #f5f6fa;">↘ -5</td>
+                                <td style="padding: 0.75rem 0.5rem; font-size: 0.875rem; color: #e57373; border-bottom: 1px solid #f5f6fa;"><strong>↘ Declining</strong></td>
+                                <td style="padding: 0.75rem 0.5rem; font-size: 0.875rem; color: #546e7a; border-bottom: 1px solid #f5f6fa;">External</td>
+                                <td style="padding: 0.75rem 0.5rem; font-size: 0.875rem; color: #546e7a; border-bottom: 1px solid #f5f6fa;">4</td>
+                                <td style="padding: 0.75rem 0.5rem; font-size: 0.875rem; color: #546e7a; border-bottom: 1px solid #f5f6fa;">3 Questions Comments</td>
+                            </tr>
+                            <tr class="interactive" data-tooltip="Stress Management - Critical Issue<br/>Score: 58/100 (Critical Zone)<br/>Down 8 points - significant decline<br/>340+ employees report high stress<br/>Urgent Action Required: Stress reduction program" style="cursor: pointer;">
+                                <td style="padding: 0.75rem 0.5rem; font-size: 0.875rem; color: #546e7a; border-bottom: 1px solid #f5f6fa;">• Stress Management</td>
+                                <td style="padding: 0.75rem 0.5rem; font-size: 0.875rem; color: #546e7a; border-bottom: 1px solid #f5f6fa;"><strong>58</strong></td>
+                                <td style="padding: 0.75rem 0.5rem; font-size: 0.875rem; color: #546e7a; border-bottom: 1px solid #f5f6fa;"><div style="width: 60px; height: 6px; background: #e1e8ed; border-radius: 3px; overflow: hidden;"><div style="height: 100%; background: #e57373; border-radius: 3px; width: 58%;"></div></div></td>
+                                <td style="padding: 0.75rem 0.5rem; font-size: 0.875rem; color: #e57373; border-bottom: 1px solid #f5f6fa;">↘ -8</td>
+                                <td style="padding: 0.75rem 0.5rem; font-size: 0.875rem; color: #e57373; border-bottom: 1px solid #f5f6fa;"><strong>↘ Unfavorable</strong></td>
+                                <td style="padding: 0.75rem 0.5rem; font-size: 0.875rem; color: #546e7a; border-bottom: 1px solid #f5f6fa;">External</td>
+                                <td style="padding: 0.75rem 0.5rem; font-size: 0.875rem; color: #546e7a; border-bottom: 1px solid #f5f6fa;">3</td>
+                                <td style="padding: 0.75rem 0.5rem; font-size: 0.875rem; color: #546e7a; border-bottom: 1px solid #f5f6fa;">5 Questions Comments</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            `,
+            
+            reports: `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <h1 style="font-size: 1.5rem; font-weight: 600; color: #2c3e50; margin: 0;">Reports</h1>
+                    <button style="background: #1976d2; color: white; padding: 0.75rem 1.5rem; border: none; border-radius: 6px; font-weight: 500; cursor: pointer;">New Report</button>
+                </div>
+
+                <div style="display: flex; gap: 2rem;">
+                    <div style="flex: 0 0 250px; background: white; border-radius: 8px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); border: 1px solid #e1e8ed; height: fit-content;">
+                        <div style="margin-bottom: 2rem;">
+                            <div style="font-size: 0.875rem; font-weight: 600; color: #455a64; margin-bottom: 1rem; text-transform: uppercase;">Goals</div>
+                            <div style="padding: 0.5rem 0; color: #546e7a; cursor: pointer;">Goal Overview <span style="float: right; background: #e1e8ed; color: #546e7a; padding: 0.125rem 0.5rem; border-radius: 10px; font-size: 0.75rem;">1</span></div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.875rem; font-weight: 600; color: #455a64; margin-bottom: 1rem; text-transform: uppercase;">Surveys</div>
+                            <div style="padding: 0.5rem 0; color: #546e7a; cursor: pointer;">All AUTI Activity</div>
+                            <div style="padding: 0.5rem 0; color: #546e7a; cursor: pointer;">Culture High Performance...</div>
+                            <div style="padding: 0.5rem 0; color: #1976d2; background: rgba(25, 118, 210, 0.1); font-weight: 500;">Engagement and Mores <span style="float: right; background: #e1e8ed; color: #546e7a; padding: 0.125rem 0.5rem; border-radius: 10px; font-size: 0.75rem;">12</span></div>
+                        </div>
+                    </div>
+
+                    <div style="flex: 1; background: white; border-radius: 8px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); border: 1px solid #e1e8ed;">
+                        <h2 style="font-size: 1rem; font-weight: 600; color: #455a64; margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid #e1e8ed;">Engagement and Mores</h2>
+                        
+                        <div style="display: flex; flex-wrap: wrap; gap: 1.5rem;">
+                            <div class="report-card" style="flex: 0 0 calc(25% - 1.125rem); background: white; border: 1px solid #e1e8ed; border-radius: 8px; padding: 1rem; cursor: pointer; text-align: center; transition: all 0.2s ease;">
+                                <div style="width: 60px; height: 60px; margin: 0 auto 1rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: white; background: linear-gradient(135deg, #1976d2, #1565c0);"><i class="bi bi-bar-chart-fill"></i></div>
+                                <div style="font-size: 0.875rem; font-weight: 500; color: #2c3e50; margin-bottom: 0.25rem;">Executive Summary Report</div>
+                                <div style="font-size: 0.75rem; color: #78909c;">Summary</div>
+                            </div>
+
+                            <div class="report-card" style="flex: 0 0 calc(25% - 1.125rem); background: white; border: 1px solid #e1e8ed; border-radius: 8px; padding: 1rem; cursor: pointer; text-align: center; transition: all 0.2s ease;" onclick="showPage('heatmap')">
+                                <div style="width: 60px; height: 60px; margin: 0 auto 1rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: white; background: linear-gradient(135deg, #e57373, #d32f2f);"><i class="bi bi-grid-3x3-gap-fill"></i></div>
+                                <div style="font-size: 0.875rem; font-weight: 500; color: #2c3e50; margin-bottom: 0.25rem;">Heat Map Report</div>
+                                <div style="font-size: 0.75rem; color: #78909c;">Heat Map</div>
+                            </div>
+
+                            <div class="report-card" style="flex: 0 0 calc(25% - 1.125rem); background: white; border: 1px solid #e1e8ed; border-radius: 8px; padding: 1rem; cursor: pointer; text-align: center; transition: all 0.2s ease;">
+                                <div style="width: 60px; height: 60px; margin: 0 auto 1rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: white; background: linear-gradient(135deg, #1976d2, #1565c0);"><i class="bi bi-speedometer2"></i></div>
+                                <div style="font-size: 0.875rem; font-weight: 500; color: #2c3e50; margin-bottom: 0.25rem;">Driver Report</div>
+                                <div style="font-size: 0.75rem; color: #78909c;">Drivers</div>
+                            </div>
+
+                            <div class="report-card" style="flex: 0 0 calc(25% - 1.125rem); background: white; border: 1px solid #e1e8ed; border-radius: 8px; padding: 1rem; cursor: pointer; text-align: center; transition: all 0.2s ease;">
+                                <div style="width: 60px; height: 60px; margin: 0 auto 1rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: white; background: linear-gradient(135deg, #e57373, #d32f2f);"><i class="bi bi-clipboard-data-fill"></i></div>
+                                <div style="font-size: 0.875rem; font-weight: 500; color: #2c3e50; margin-bottom: 0.25rem;">Response Rate Report</div>
+                                <div style="font-size: 0.75rem; color: #78909c;">Response Rates</div>
+                            </div>
+
+                            <div class="report-card" style="flex: 0 0 calc(25% - 1.125rem); background: white; border: 1px solid #e1e8ed; border-radius: 8px; padding: 1rem; cursor: pointer; text-align: center; transition: all 0.2s ease;">
+                                <div style="width: 60px; height: 60px; margin: 0 auto 1rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: white; background: linear-gradient(135deg, #1976d2, #1565c0);"><i class="bi bi-people-fill"></i></div>
+                                <div style="font-size: 0.875rem; font-weight: 500; color: #2c3e50; margin-bottom: 0.25rem;">Manager Report</div>
+                                <div style="font-size: 0.75rem; color: #78909c;">Managers</div>
+                            </div>
+
+                            <div class="report-card" style="flex: 0 0 calc(25% - 1.125rem); background: white; border: 1px solid #e1e8ed; border-radius: 8px; padding: 1rem; cursor: pointer; text-align: center; transition: all 0.2s ease;">
+                                <div style="width: 60px; height: 60px; margin: 0 auto 1rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: white; background: linear-gradient(135deg, #e57373, #d32f2f);"><i class="bi bi-chat-left-text-fill"></i></div>
+                                <div style="font-size: 0.875rem; font-weight: 500; color: #2c3e50; margin-bottom: 0.25rem;">Comments</div>
+                                <div style="font-size: 0.75rem; color: #78909c;">Comments</div>
+                            </div>
+
+                            <div class="report-card" style="flex: 0 0 calc(25% - 1.125rem); background: white; border: 1px solid #e1e8ed; border-radius: 8px; padding: 1rem; cursor: pointer; text-align: center; transition: all 0.2s ease;">
+                                <div style="width: 60px; height: 60px; margin: 0 auto 1rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: white; background: linear-gradient(135deg, #1976d2, #1565c0);"><i class="bi bi-pie-chart-fill"></i></div>
+                                <div style="font-size: 0.875rem; font-weight: 500; color: #2c3e50; margin-bottom: 0.25rem;">Exec Summary Dashboard</div>
+                                <div style="font-size: 0.75rem; color: #78909c;">Dashboard</div>
+                            </div>
+
+                            <div class="report-card" style="flex: 0 0 calc(25% - 1.125rem); background: white; border: 1px solid #e1e8ed; border-radius: 8px; padding: 1rem; cursor: pointer; text-align: center; transition: all 0.2s ease;">
+                                <div style="width: 60px; height: 60px; margin: 0 auto 1rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: white; background: linear-gradient(135deg, #e57373, #d32f2f);"><i class="bi bi-exclamation-triangle-fill"></i></div>
+                                <div style="font-size: 0.875rem; font-weight: 500; color: #2c3e50; margin-bottom: 0.25rem;">Alerts</div>
+                                <div style="font-size: 0.75rem; color: #78909c;">Alerts</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `,
+            
+            heatmap: `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+                            <button onclick="showPage('reports')" style="background: none; border: none; color: #1976d2; cursor: pointer; font-size: 1rem;">← Heat Map Report</button>
+                        </div>
+                        <div style="font-size: 0.875rem; color: #78909c;">
+                            A.U.TI > Engagement and Mores > Glint > Q4 Engagement and Mores Pulse > Ask a Pilot
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 1rem;">
+                        <button style="background: none; border: 1px solid #e1e8ed; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer;">Export ↓</button>
+                        <button style="background: none; border: 1px solid #e1e8ed; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer;">Settings</button>
+                        <button style="background: none; border: 1px solid #e1e8ed; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer;">More ⋯</button>
+                    </div>
+                </div>
+
+                <div style="background: white; border-radius: 8px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); border: 1px solid #e1e8ed;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h2 style="font-size: 1rem; font-weight: 600; color: #455a64; margin: 0;">Manager Hierarchy</h2>
+                    </div>
+
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 1rem;">
+                            <thead>
+                                <tr style="background: #f8f9fa;">
+                                    <th style="text-align: left; padding: 0.75rem 0.5rem; font-size: 0.875rem; font-weight: 600; color: #455a64; border: 1px solid #e1e8ed;">Category</th>
+                                    <th style="text-align: center; padding: 0.75rem 0.5rem; font-size: 0.875rem; font-weight: 600; color: #455a64; border: 1px solid #e1e8ed;">Overall</th>
+                                    <th style="text-align: center; padding: 0.75rem 0.5rem; font-size: 0.875rem; font-weight: 600; color: #455a64; border: 1px solid #e1e8ed;">Manager</th>
+                                    <th style="text-align: center; padding: 0.75rem 0.5rem; font-size: 0.875rem; font-weight: 600; color: #455a64; border: 1px solid #e1e8ed;">Growth</th>
+                                    <th style="text-align: center; padding: 0.75rem 0.5rem; font-size: 0.875rem; font-weight: 600; color: #455a64; border: 1px solid #e1e8ed;">Wellbeing</th>
+                                    <th style="text-align: center; padding: 0.75rem 0.5rem; font-size: 0.875rem; font-weight: 600; color: #455a64; border: 1px solid #e1e8ed;">Work-Life</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="padding: 0.75rem 0.5rem; font-size: 0.875rem; color: #455a64; border: 1px solid #e1e8ed; font-weight: 500;">Engagement Index</td>
+                                    <td style="padding: 0.75rem 0.5rem; text-align: center; font-size: 0.875rem; color: white; border: 1px solid #e1e8ed; background: #1976d2; font-weight: 600;">82</td>
+                                    <td style="padding: 0.75rem 0.5rem; text-align: center; font-size: 0.875rem; color: white; border: 1px solid #e1e8ed; background: #42a5f5; font-weight: 600;">75</td>
+                                    <td style="padding: 0.75rem 0.5rem; text-align: center; font-size: 0.875rem; color: white; border: 1px solid #e1e8ed; background: #1976d2; font-weight: 600;">84</td>
+                                    <td style="padding: 0.75rem 0.5rem; text-align: center; font-size: 0.875rem; color: white; border: 1px solid #e1e8ed; background: #42a5f5; font-weight: 600;">77</td>
+                                    <td style="padding: 0.75rem 0.5rem; text-align: center; font-size: 0.875rem; color: white; border: 1px solid #e1e8ed; background: #e57373; font-weight: 600;">68</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 0.75rem 0.5rem; font-size: 0.875rem; color: #455a64; border: 1px solid #e1e8ed; font-weight: 500;">Manager Effectiveness</td>
+                                    <td style="padding: 0.75rem 0.5rem; text-align: center; font-size: 0.875rem; color: white; border: 1px solid #e1e8ed; background: #42a5f5; font-weight: 600;">79</td>
+                                    <td style="padding: 0.75rem 0.5rem; text-align: center; font-size: 0.875rem; color: white; border: 1px solid #e1e8ed; background: #1976d2; font-weight: 600;">81</td>
+                                    <td style="padding: 0.75rem 0.5rem; text-align: center; font-size: 0.875rem; color: white; border: 1px solid #e1e8ed; background: #42a5f5; font-weight: 600;">76</td>
+                                    <td style="padding: 0.75rem 0.5rem; text-align: center; font-size: 0.875rem; color: white; border: 1px solid #e1e8ed; background: #42a5f5; font-weight: 600;">79</td>
+                                    <td style="padding: 0.75rem 0.5rem; text-align: center; font-size: 0.875rem; color: white; border: 1px solid #e1e8ed; background: #e57373; font-weight: 600;">62</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 0.75rem 0.5rem; font-size: 0.875rem; color: #455a64; border: 1px solid #e1e8ed; font-weight: 500;">Stress Management</td>
+                                    <td style="padding: 0.75rem 0.5rem; text-align: center; font-size: 0.875rem; color: white; border: 1px solid #e1e8ed; background: #d32f2f; font-weight: 600;">58</td>
+                                    <td style="padding: 0.75rem 0.5rem; text-align: center; font-size: 0.875rem; color: white; border: 1px solid #e1e8ed; background: #e57373; font-weight: 600;">61</td>
+                                    <td style="padding: 0.75rem 0.5rem; text-align: center; font-size: 0.875rem; color: white; border: 1px solid #e1e8ed; background: #e57373; font-weight: 600;">65</td>
+                                    <td style="padding: 0.75rem 0.5rem; text-align: center; font-size: 0.875rem; color: white; border: 1px solid #e1e8ed; background: #e57373; font-weight: 600;">63</td>
+                                    <td style="padding: 0.75rem 0.5rem; text-align: center; font-size: 0.875rem; color: white; border: 1px solid #e1e8ed; background: #d32f2f; font-weight: 600;">54</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div style="display: flex; justify-content: center; align-items: center; gap: 2rem; margin-top: 1rem;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div style="width: 20px; height: 15px; background: #d32f2f;"></div>
+                            <span style="font-size: 0.75rem; color: #455a64;">50-</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div style="width: 20px; height: 15px; background: #e57373;"></div>
+                            <span style="font-size: 0.75rem; color: #455a64;">60</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div style="width: 20px; height: 15px; background: #42a5f5;"></div>
+                            <span style="font-size: 0.75rem; color: #455a64;">75</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div style="width: 20px; height: 15px; background: #1976d2;"></div>
+                            <span style="font-size: 0.75rem; color: #455a64;">85+</span>
+                        </div>
+                    </div>
+                </div>
+            `
+        };
+
+        // Page management
+        function showPage(pageName) {
+            console.log('Showing page:', pageName);
+            const content = document.getElementById('app-content');
+            content.innerHTML = pages[pageName] || pages.dashboard;
+            updateNavigation(pageName);
+        }
+
+        function updateNavigation(activePage) {
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.style.color = '#546e7a';
+                link.style.fontWeight = '500';
+            });
+            
+            if (activePage === 'dashboard' || activePage === 'reports') {
+                const activeLink = document.querySelector(`[data-page="${activePage}"]`);
+                if (activeLink) {
+                    activeLink.style.color = '#1976d2';
+                    activeLink.style.fontWeight = '600';
+                }
+            } else {
+                // For sub-pages like heatmap, keep reports highlighted
+                const reportsLink = document.querySelector('[data-page="reports"]');
+                if (reportsLink) {
+                    reportsLink.style.color = '#1976d2';
+                    reportsLink.style.fontWeight = '600';
+                }
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded');
+            
+            // Show dashboard by default
+            showPage('dashboard');
+            
+            // Set up navigation
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function() {
+                    const page = this.getAttribute('data-page');
+                    if (page === 'goals') {
+                        alert('Goals page not implemented yet');
+                    } else {
+                        showPage(page);
+                    }
+                });
+            });
+
+            // Set up tooltip functionality
+            setupTooltips();
+        });
+
+        // Tooltip functionality
+        function setupTooltips() {
+            const tooltip = document.getElementById('tooltip');
+            
+            // Function to show tooltip
+            function showTooltip(e, text) {
+                tooltip.innerHTML = text;
+                tooltip.classList.add('show');
+                updateTooltipPosition(e);
+            }
+            
+            // Function to hide tooltip
+            function hideTooltip() {
+                tooltip.classList.remove('show');
+            }
+            
+            // Function to update tooltip position
+            function updateTooltipPosition(e) {
+                const rect = tooltip.getBoundingClientRect();
+                const x = e.pageX;
+                const y = e.pageY;
+                
+                let left = x - rect.width / 2;
+                let top = y - rect.height - 15;
+                
+                if (left < 10) left = 10;
+                if (left + rect.width > window.innerWidth - 10) {
+                    left = window.innerWidth - rect.width - 10;
+                }
+                if (top < 10) {
+                    top = y + 15;
+                }
+                
+                tooltip.style.left = left + 'px';
+                tooltip.style.top = top + 'px';
+            }
+
+            // Set up event delegation for tooltips
+            document.addEventListener('mouseenter', function(e) {
+                if (e.target.matches('.interactive') || e.target.closest('.interactive')) {
+                    const element = e.target.matches('.interactive') ? e.target : e.target.closest('.interactive');
+                    const tooltipText = element.getAttribute('data-tooltip');
+                    if (tooltipText) {
+                        showTooltip(e, tooltipText);
+                    }
+                }
+            }, true);
+
+            document.addEventListener('mousemove', function(e) {
+                if (tooltip.classList.contains('show')) {
+                    updateTooltipPosition(e);
+                }
+            });
+
+            document.addEventListener('mouseleave', function(e) {
+                if (e.target.matches('.interactive') || e.target.closest('.interactive')) {
+                    hideTooltip();
+                }
+            }, true);
+        }
+    </script>
+</body>
+</html>
